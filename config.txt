@@ -1,0 +1,4 @@
+# Put this file inside the USB storage device to 
+# choose HDMI audio or local jack stereo connector
+# Possible values are 'local' or 'hdmi' (default)
+AUDIO_OUTPUT=local 

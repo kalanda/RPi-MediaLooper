@@ -2,11 +2,11 @@ RPi-MediaLooper
 ===============
 Automatic looper for video or audio useful for digital posters and audiovisual installations using *Raspberry Pi* hardware. 
 
-- Looks for files stored in a USB device with a FAT filesystem accesible by any operating system
+- Looks for files stored in a USB device
 - Recognized file extensions .mp4, .avi, .mkv, .mp3, .mov, .mpg, .flv, .m4v and .divx
-- Audio output is set by default to HDMI but is configurable via config.txt on USB root
+- Audio output is set by default to HDMI but is configurable via *config.txt* file placed on USB root
 - Automatic startup without user intervention when device is powered on
-- If more than one video are found will play all videos in alphabet order and start again
+- If more than one file is found will play all in alphabet order and start again
 
 ## Overview
 
@@ -34,7 +34,7 @@ First time you boot the fresh Raspbian installation, the `raspi-config` menu wil
 **NOTE:** You can always open this utility again by typing `sudo raspi-config` at command line
 
 ### Step 3. Fix locale warnings
-Some warnings appear when install some packages referring to locale. To fix this you have to edit `/etc/default/locale` file. 
+Some warnings referring to locale appears when installing some packages. To fix this you have to edit `/etc/default/locale` file:
 
 	sudo nano /etc/default/locale
 
@@ -44,21 +44,40 @@ Put that:
 	LC_ALL=en_GB.UTF-8
 	LANGUAGE=en_GB.UTF-8
 	
-When is done, press CTRL-O and enter to save and CTRL-X to exit.
+When is done, press CTRL-O and ENTER to save and CTRL-X to exit.
 
 ### Step 4. Update and upgrade packages
-First at all, you have to update package list and upgrade by typing this:
+First at all, you have to update and upgrade packages:
 
 	sudo apt-get update
 	sudo apt-get upgrade
 	
 ### Step 5. Install USB automount
-This make your USB storage easy to mount at boot and any time you disconnect and connect again.
+This makes your USB storage easiest to mount at boot and any time you disconnect and connect again.
 
 	sudo apt-get install usbmount
 
-### Step 6. Configure autologin without password
-Our system is not connected to any keyboard and has not sensible data, autologin is not a problem and make easy to run scripts at startup.
+### Step 6. Download our script
+
+Download the script:
+
+	cd /home/pi
+	wget https://raw.githubusercontent.com/kalanda/RPi-MediaLooper/master/videoloop.sh
+
+Add permissions to execute:
+
+	chmod +x videoloop.sh
+	
+### Step 7. Test the script
+
+Put a video or audio file in a USB storage device and connect it to *Raspberry Pi*, then write this at your prompt:
+
+	./videoloop.sh
+	
+This should play your video in a endless loop. Press CTRL-C anytime to exit.
+	
+### Step 8. Configure autologin without password
+Our system is not necessary connected to a keyboard to work and has not any sensible data, then autologin is not a problem and makes easy to run our script at startup.
 
 Edit `/etc/inittab`
 
@@ -72,32 +91,12 @@ Add login program to inittab adding the following line just below the commented 
 	
 	1:2345:respawn:/bin/login -f pi tty1 </dev/tty1 >/dev/tty1 2>&1
 
-This will run the login program with pi user and without any authentication.
+This will run the login program with *pi* user and without any authentication.
 
-When is done, press CTRL-O and enter to save and CTRL-X to exit.
-
-### Step 7. Install videoloop script
-
-Download the script
-
-	cd /home/pi
-	wget https://raw.githubusercontent.com/kalanda/RPi-MediaLooper/master/videoloop.sh
-
-Add permissions to execute
-
-	chmod +x videoloop.sh
-	
-### Step 8. Test the script
-
-Put a video file in a USB storage device and connect to Raspberry, then write this at your prompt:
-
-	./videoloop.sh
-	
-This should play your video in loop.
-
+When is done, press CTRL-O and ENTER to save and CTRL-X to exit.
 
 ### Step 9. Add script to startup	
-To make the tested script run at startup, edit `/etc/profile` by typing:
+To run at startup, edit `/etc/profile` by typing:
 
 	sudo nano /etc/profile
 	
@@ -105,19 +104,21 @@ Add `/home/pi/videoloop.sh` at the end of file
 
 When is done, press CTRL-O and enter to save and CTRL-X to exit.
 
-Now you can reboot your system to test
+Now you can reboot your system to test:
 
 	sudo reboot
 	
+Script will start automatically when systems reboots.
+	
 ## 	Prevent SD card from getting corrupted
 
-If your system will be in a environment where shutdown and start are done by switching power supply, the SD card can get corrupted if shutdown occurs meanwhile system is writing data. To prevent this situation is possible to mount all partitions with readonly flag and put logs and pids at ram (removed when shutdown). 
+If your system will be placed in a environment where shutdown is done by switching power supply, the SD card can get corrupted easily if shutdown occurs while system is writing data. To prevent this situation is possible to mount all partitions with readonly flag and put logs and pids at RAM memory (erased at shutdown). 
 
 Edit `/etc/fstab` by typing:
 
 	sudo nano /etc/fstab
 
-Put `ro` (readonly) to default column of all partitions and add last two lines to mount logs an run in RAM. It should look something like the following. 
+Put `ro` (readonly) to *defaults* column of all partitions and add last two lines to mount logs an run in RAM. It should look something like the following. 
 
 	proc            /proc           proc    defaults          0       0
 	/dev/mmcblk0p1  /boot           vfat    ro                0       2
@@ -125,7 +126,7 @@ Put `ro` (readonly) to default column of all partitions and add last two lines t
 	none            /var/run  ramfs   size=1M  0 0
 	none            /var/log  ramfs   size=1M  0 0
 	
-When is done, press CTRL-O and enter to save and CTRL-X to exit. Then run: 
+When is done, press CTRL-O and ENTER to save and CTRL-X to exit. Then run: 
 
 	sudo partprobe 
 	
@@ -145,19 +146,19 @@ Finding a good solution for showing a single video throught projectors in a infi
 #### CuriousTechnologist's solution - [link](http://curioustechnologist.com/post/104242571716/rpilooper-v2-b-seamless-video-looper-for)
 **PROS:** Real seamless loop, no blanks or gaps between loops. 
 
-**CONS:** Does not support audio. Is based on a custom binary program coded in C. Require to prepare videos with a specific feature of h264 codec using AviDemux and naming the file with .h264 extension to work.
+**CONS:** Does not support audio. Is based on a custom binary program coded in C. Requires to prepare videos with a specific feature of h264 codec using AviDemux and naming the file with .h264 extension to work.
 
 #### StevenHickson's solution - [link](http://stevenhickson.blogspot.com.es/2014/05/rpi-video-looper-20.html)
 
-**PROS:** Code is available at [GitHub](https://github.com/StevenHickson/RPiVideoLooper). Is based on *omxplayer*, which can play almost any video format. Create a service daemon to autoboot.
+**PROS:** Code is available at [GitHub](https://github.com/StevenHickson/RPiVideoLooper). Is based on *omxplayer*, which can play almost any video format. Creates a service daemon to autoboot.
 
-**CONS:** Is not seamless, the gap (1 or 2 seconds) between loops depends of the length of video. If you don't use the disk image, the code has some bugs on the installer and the code because uses a standalone version of *omxplayer* instead the version included by default in *Raspbian*. When *omxplayer* plays your videos, uses the `-l` option for loop, but there are some bugs on this feature. If video has not audio, it hangs on second loop. If video is in a mp4 container, 5 seconds at the end of video will lost in each loop ([issue 291](https://github.com/popcornmix/omxplayer/issues/291)). 
+**CONS:** The loop is not seamless, the gap between loops (1 or 2 seconds) depends of the length of video. If you don't use the disk image, the code has some bugs on the installer and the code because uses a standalone version of *omxplayer* instead the version included by default in *Raspbian*. When *omxplayer* plays your videos, uses the `-l` option for loop, but there are some bugs on this feature. If video has not audio, it hangs on second loop. If video is in a mp4 container, 5 seconds at the end of video will lost in each loop ([issue 291](https://github.com/popcornmix/omxplayer/issues/291)). 
 
 #### GeekTips's solution - [link](http://www.geek-tips.com/2014/07/30/infinite-video-loops-on-a-raspberry-pi/)
 
-**PROS:** Just one bash script. Use the *omxplayer* that comes with *Raspbian* that is IMO, the best option to play any video, but instead of `-l` option for loop (this option has some bugs commented above) the script calls in a infinite while loop to *omxplayer* for launch the video. Catch for CTRL-C to stop the player.
+**PROS:** Just one bash script. Uses the *omxplayer* that comes with *Raspbian* that is IMO, the best option to play any video, but instead of `-l` option for loop (this option has some bugs commented above) the script calls in a infinite while loop to *omxplayer* for launch the video. Catch for CTRL-C to stop the player.
 
-**CONS:** Has not online repository for code. Don't provide a autoboot feature. 
+**CONS:** Has not online repository for code. Don't provides a autoboot feature. 
 
 #### Other similar projects
 
